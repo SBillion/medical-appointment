@@ -1,147 +1,116 @@
+<div align="center">
+
 # Backend Technical Exercise
 
-## Context
+Medical appointment booking API with FastAPI, PostgreSQL, and React.
 
-You are given a small local application for booking medical appointments. The
-repository contains a minimal backend, a PostgreSQL database with seeded data,
-and a React frontend with a pre-built appointment selection screen using static
-mock data.
+[![Backend CI](https://github.com/SBillion/sunrise-interview-exercice/actions/workflows/backend.yml/badge.svg)](https://github.com/SBillion/sunrise-interview-exercice/actions/workflows/backend.yml)
+[![Frontend CI](https://github.com/SBillion/sunrise-interview-exercice/actions/workflows/frontend.yml/badge.svg)](https://github.com/SBillion/sunrise-interview-exercice/actions/workflows/frontend.yml)
 
-Your task is to implement the backend API needed to power the booking flow, then
-connect the frontend to it.
+![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 
-The exercise is intentionally small. We expect this to take around 1.5 to 2
-hours.
+![Backend Tests](https://img.shields.io/badge/backend%20tests-38%20passed-brightgreen?logo=pytest&logoColor=white)
+![Frontend Tests](https://img.shields.io/badge/frontend%20tests-18%20passed-brightgreen?logo=vitest&logoColor=white)
+![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Goal
+![ruff](https://img.shields.io/badge/ruff-passed-brightgreen?logo=ruff&logoColor=white)
+![mypy](https://img.shields.io/badge/mypy-strict-blue?logo=python&logoColor=white)
+![pre-commit](https://img.shields.io/badge/pre--commit-active-yellow?logo=pre-commit&logoColor=white)
 
-As a user, I want to see available appointment slots and confirm one of them, so
-that an appointment is booked.
+</div>
 
-The booking flow starts on the appointment slot selection screen and ends once
-the appointment has been confirmed.
+---
 
-## Provided Setup
+## Overview
 
-The repository provides:
+A medical appointment booking system where users can browse available
+doctor slots (aggregated by start time) and confirm a booking. The backend
+selects an available doctor automatically using row-level locking to
+prevent double-booking under concurrent requests.
 
-- A local PostgreSQL database with seeded data.
-- A minimal Python backend starter.
-- A React + TypeScript frontend with an existing appointment selection UI.
-- A Docker Compose setup to run the database, backend, and frontend locally.
+## Quick Start
 
-The starter implementation is only a suggested base. You may change the
-structure, add dependencies, or adjust the implementation approach if you think
-it improves the solution.
-
-## Running Locally
-
-Start the full local stack with:
+Run the full stack — database, backend, and frontend — with a single command:
 
 ```sh
 docker compose up --build
 ```
 
-Once running, the services are available at:
+| Service      | URL                                 |
+| ------------ | ----------------------------------- |
+| Frontend     | http://localhost:5173               |
+| Swagger UI   | http://localhost:8000/docs           |
+| ReDoc        | http://localhost:8000/redoc         |
+| OpenAPI JSON | http://localhost:8000/openapi.json  |
+| Health       | http://localhost:8000/api/health    |
 
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:8000`
-- Backend healthcheck: `http://localhost:8000/health`
-- PostgreSQL: `localhost:5432`
-
-To reset the database and seeded data:
+<details>
+<summary>Reset the database and reseed</summary>
 
 ```sh
 docker compose down -v
 docker compose up --build
 ```
 
-Resetting the database reseeds from the current date.
+Resetting recreates the PostgreSQL volume and re-runs the init scripts
+(`db/init/`), which seed availability data relative to the current date.
 
-## Functional Requirements
+</details>
 
-### Available Slots
+## Local Development
 
-The application should display available appointment slots.
+Each subproject is self-contained with its own `Makefile` and `README.md`:
 
-Doctor availability data is provided in the database. Multiple doctors may be
-available at the same time.
+| Project  | Directory   | Guide                                      |
+| -------- | ----------- | ------------------------------------------ |
+| Backend  | `backend/`  | [backend/README.md](backend/README.md)     |
+| Frontend | `frontend/` | [frontend/README.md](frontend/README.md)   |
 
-Slots shown to the user must be aggregated by start time. For example, if two
-doctors are available at `10:00`, the frontend should display a single `10:00`
-slot, not one slot per doctor.
+## API
 
-### Booking
+Interactive documentation is auto-generated by FastAPI:
 
-When the user selects a slot and confirms it, the backend should book one
-available doctor for that slot.
+- **Swagger UI** (`/docs`) — try endpoints interactively
+- **ReDoc** (`/redoc`) — clean, read-friendly reference
+- **OpenAPI JSON** (`/openapi.json`) — raw spec for tooling
 
-The user does not choose a doctor directly. The backend is responsible for
-selecting an available doctor for the requested time.
+| Method | Endpoint         | Description                                       |
+| ------ | ---------------- | ------------------------------------------------- |
+| GET    | `/api/slots`     | List available slots (aggregated by start time)   |
+| POST   | `/api/bookings`  | Book a doctor for a slot (backend selects doctor) |
+| GET    | `/api/health`    | Database health check                             |
 
-The booking must be persisted in the database.
+## Tech Stack
 
-### Double Booking
+| Layer       | Technologies                                              |
+| ----------- | -------------------------------------------------------- |
+| Backend     | Python 3.13, FastAPI, SQLAlchemy 2.0 (async), asyncpg   |
+| Frontend    | React 19, TypeScript, Vite                              |
+| Database    | PostgreSQL 16                                            |
+| Tooling     | uv, ruff, mypy, pytest, vitest, ESLint, Prettier        |
+| CI/CD       | pre-commit (ruff, ruff-format, mypy, uv lock, eslint, prettier, vitest) |
 
-The same underlying doctor availability must not be booked twice.
+## Project Structure
 
-If a slot is no longer available when the user tries to confirm it, the
-application should handle this case properly.
+```
+.
+├── EXERCISE.md              # Original exercise instructions
+├── docker-compose.yml       # Full local stack
+├── db/init/                 # PostgreSQL init scripts (schema + seed)
+├── backend/                 # FastAPI API (src/ layout)
+│   ├── src/app/             # Application code
+│   ├── tests/unit/          # Pure logic tests (no DB)
+│   ├── tests/integration/   # Real PostgreSQL tests
+│   ├── pyproject.toml
+│   └── Makefile
+└── frontend/                # React + TypeScript
+    ├── src/                 # Components, API client, tests
+    └── Makefile
+```
 
-### Frontend Integration
-
-The frontend currently uses static mock data.
-
-You should replace the relevant mock behavior with calls to your backend API:
-
-- Fetch available slots from the backend.
-- Confirm a selected slot through the backend.
-- Reflect the result in the UI.
-
-## Out of Scope
-
-The following topics are intentionally out of scope:
-
-- Authentication.
-- Patient account management.
-
-Dates and times provided by the backend/database can be treated as UTC. You may
-improve timezone handling if you want, but it is not required.
-
-## API Design
-
-No specific API contract is imposed.
-
-You are expected to design the endpoint or endpoints you need for this flow. We
-are interested in how you model the API, the database interactions, and the
-error cases.
-
-## Technical Expectations
-
-We are primarily interested in:
-
-- Clear backend design.
-- Simple and appropriate data modeling.
-- Correct SQL/database behavior.
-- A clean API surface.
-- Reasonable error handling.
-- Code that is easy to read, review, and discuss.
-
-Tests are welcome if you think they are useful, but they are not mandatory for
-this exercise.
-
-## Acceptance Criteria
-
-Your solution should satisfy the following criteria:
-
-- The project can be run locally.
-- The user can see available appointment slots in the frontend.
-- Slots are aggregated by start time.
-- Confirming a slot creates a persisted appointment.
-- The backend selects an available doctor for the selected slot.
-- The same doctor availability cannot be booked twice.
-- Functional errors, such as trying to book an unavailable slot, are handled
-  cleanly.
-- The frontend uses the backend instead of static mock data for the booking
-  flow.
-- The code remains simple, maintainable, and ready to review.
+See [EXERCISE.md](EXERCISE.md) for the original exercise instructions.
