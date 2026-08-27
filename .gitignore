@@ -4,10 +4,15 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 .venv/
+htmlcov/
+.coverage
 
 node_modules/
 dist/
 .vite/
+*.tsbuildinfo
 
-postgres_data/
+postgres_data/coverage/
