@@ -34,7 +34,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 INIT_DIR = REPO_ROOT / "db" / "init"
 
 # Base server URL (strip the db name) so we can create the test db.
-TEST_SERVER_URL = settings.test_database_url.rsplit("/", 1)[0]
+TEST_SERVER_URL = settings.database_url.rsplit("/", 1)[0]
 TEST_DB_NAME = settings.test_database_name
 TEST_DB_URL = f"{TEST_SERVER_URL}/{TEST_DB_NAME}"
 

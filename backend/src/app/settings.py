@@ -12,12 +12,6 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+asyncpg://app:app@localhost:5432/backend_exercise"
     cors_origins: list[str] = ["http://localhost:5173"]
-
-    # Test-specific: the base Postgres server URL (without a database name).
-    # The conftest creates `test_database_name` on this server at startup.
-    test_database_url: str = (
-        "postgresql+asyncpg://app:app@localhost:5432/backend_exercise"
-    )
     test_database_name: str = "backend_exercise_test"
 
 
