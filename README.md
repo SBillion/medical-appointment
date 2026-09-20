@@ -1,11 +1,11 @@
 <div align="center">
 
-# Backend Technical Exercise
+# Medical Appointment Booking System
 
 Medical appointment booking API with FastAPI, PostgreSQL, and React.
 
-[![Backend CI](https://github.com/SBillion/sunrise-interview-exercice/actions/workflows/backend.yml/badge.svg)](https://github.com/SBillion/sunrise-interview-exercice/actions/workflows/backend.yml)
-[![Frontend CI](https://github.com/SBillion/sunrise-interview-exercice/actions/workflows/frontend.yml/badge.svg)](https://github.com/SBillion/sunrise-interview-exercice/actions/workflows/frontend.yml)
+[![Backend CI](https://github.com/SBillion/medical-appointment/actions/workflows/backend.yml/badge.svg)](https://github.com/SBillion/medical-appointment/actions/workflows/backend.yml)
+[![Frontend CI](https://github.com/SBillion/medical-appointment/actions/workflows/frontend.yml/badge.svg)](https://github.com/SBillion/medical-appointment/actions/workflows/frontend.yml)
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?logo=fastapi&logoColor=white)

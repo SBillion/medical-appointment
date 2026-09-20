@@ -33,7 +33,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: backend_exercise
+          POSTGRES_DB: medical_appointment
         ports:
           - 5432:5432
         options: >-
@@ -43,9 +43,9 @@ jobs:
           --health-retries 10
 
     env:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/backend_exercise
-      TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/backend_exercise
-      TEST_DATABASE_NAME: backend_exercise_test
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/medical_appointment
+      TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/medical_appointment
+      TEST_DATABASE_NAME: medical_appointment_test
 
     steps:
       - uses: actions/checkout@v4

@@ -115,4 +115,4 @@ All settings via environment variables or `.env` file. See `.env.example`:
 | `DATABASE_URL`      | `postgresql+asyncpg://app:app@localhost:5432/...`      |
 | `CORS_ORIGINS`      | `["http://localhost:5173"]`                              |
 | `TEST_DATABASE_URL`  | Test Postgres server URL                                 |
-| `TEST_DATABASE_NAME` | Test database name (default: `backend_exercise_test`)    |
+| `TEST_DATABASE_NAME` | Test database name (default: `medical_appointment_test`) |

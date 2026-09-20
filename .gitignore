@@ -16,3 +16,4 @@ dist/
 *.tsbuildinfo
 
 postgres_data/coverage/
+
