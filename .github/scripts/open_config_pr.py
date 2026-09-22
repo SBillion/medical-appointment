@@ -218,6 +218,15 @@ def find_open_pr(
     return int(data[0]["number"]), data[0].get("body", "")
 
 
+def ensure_label(config_full: str, label: str) -> None:
+    """Create the label on the config repo if it doesn't exist."""
+    subprocess.run(
+        ["gh", "label", "create", label, "--repo", config_full],
+        text=True,
+        capture_output=True,
+    )
+
+
 def create_pr(
     config_full: str,
     base: str,
@@ -227,6 +236,7 @@ def create_pr(
     label: str,
     auto_merge: bool,
 ) -> None:
+    ensure_label(config_full, label)
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as f:
         f.write(body)
         body_file = f.name
