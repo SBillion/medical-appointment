@@ -7,9 +7,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Appointment, Doctor, DoctorAvailability
 
 
-def utc(hour: int, minute: int = 0, day_offset: int = 0) -> datetime:
-    base = datetime(2026, 1, 1, tzinfo=UTC) + timedelta(days=day_offset)
-    return base.replace(hour=hour, minute=minute, second=0, microsecond=0)
+def utc(hour: int, minute: int = 0, day_offset: int = 1) -> datetime:
+    """Return a UTC datetime on a future day (default: tomorrow).
+
+    Tests use day_offset relative to *now* so dates are always in the future
+    and never trip the past-booking guard.
+    """
+    base = datetime.now(UTC).replace(
+        hour=hour, minute=minute, second=0, microsecond=0
+    ) + timedelta(days=day_offset)
+    return base
 
 
 def booking_payload(starts_at: datetime | str) -> dict:

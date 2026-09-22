@@ -6,6 +6,35 @@ import App from "./App";
 
 const BASE = "http://localhost:8000/api";
 
+function futureISO(days: number, hour: number, minute = 0): string {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + days);
+  d.setUTCHours(hour, minute, 0, 0);
+  return d.toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+function formatDay(value: string): string {
+  return new Intl.DateTimeFormat("en", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
+
+function formatTime(value: string): string {
+  return new Intl.DateTimeFormat("en", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
+
+const day1 = futureISO(1, 10);
+const day1Slot2 = futureISO(1, 10, 30);
+const day2 = futureISO(2, 16);
+const day1Ends = futureISO(1, 10, 30);
+
 function mockSlotsResponse(slots: unknown[]): Response {
   return new Response(JSON.stringify(slots), {
     status: 200,
@@ -31,8 +60,8 @@ function mockFetch(
   slots: unknown[] = [],
   bookingResponse: Response = mockBookingResponse({
     id: 1,
-    startsAt: "2026-01-01T10:00:00Z",
-    endsAt: "2026-01-01T10:30:00Z",
+    startsAt: day1,
+    endsAt: day1Ends,
     doctor: { id: 1, fullName: "Dr. Hart", specialty: "General Medicine" },
   }),
 ): void {
@@ -46,15 +75,15 @@ function mockFetch(
 }
 
 const sampleSlots = [
-  { startsAt: "2026-01-01T10:00:00Z", availableDoctors: 2 },
-  { startsAt: "2026-01-01T10:30:00Z", availableDoctors: 1 },
-  { startsAt: "2026-01-02T16:00:00Z", availableDoctors: 3 },
+  { startsAt: day1, availableDoctors: 2 },
+  { startsAt: day1Slot2, availableDoctors: 1 },
+  { startsAt: day2, availableDoctors: 3 },
 ];
 
 const sampleBooking = {
   id: 1,
-  startsAt: "2026-01-01T10:00:00Z",
-  endsAt: "2026-01-01T10:30:00Z",
+  startsAt: day1,
+  endsAt: day1Ends,
   doctor: { id: 1, fullName: "Dr. Hart", specialty: "General Medicine" },
 };
 
@@ -74,8 +103,8 @@ describe("App", () => {
       expect(screen.queryByText("Loading slots…")).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText("Thursday, January 1")).toBeInTheDocument();
-    expect(screen.getByText("Friday, January 2")).toBeInTheDocument();
+    expect(screen.getByText(formatDay(day1))).toBeInTheDocument();
+    expect(screen.getByText(formatDay(day2))).toBeInTheDocument();
   });
 
   it("displays doctor count per slot", async () => {
@@ -122,10 +151,10 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("10:00 AM"));
+    await user.click(screen.getByText(formatTime(day1)));
     expect(screen.getByText("Confirm appointment")).toBeEnabled();
 
     await user.click(screen.getByText("Confirm appointment"));
@@ -141,10 +170,10 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("10:00 AM"));
+    await user.click(screen.getByText(formatTime(day1)));
     await user.click(screen.getByText("Confirm appointment"));
 
     await waitFor(() => {
@@ -159,14 +188,14 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("10:00 AM"));
+    await user.click(screen.getByText(formatTime(day1)));
 
-    const times = screen.getAllByText("10:00 AM");
+    const times = screen.getAllByText(formatTime(day1));
     expect(times.length).toBeGreaterThanOrEqual(2);
-    const days = screen.getAllByText("Thursday, January 1");
+    const days = screen.getAllByText(formatDay(day1));
     expect(days.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -183,10 +212,10 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("10:00 AM"));
+    await user.click(screen.getByText(formatTime(day1)));
     await user.click(screen.getByText("Confirm appointment"));
 
     await waitFor(() => {
@@ -211,10 +240,10 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("10:00 AM"));
+    await user.click(screen.getByText(formatTime(day1)));
     await user.click(screen.getByText("Confirm appointment"));
 
     await waitFor(() => {
@@ -241,10 +270,10 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("10:00 AM"));
+    await user.click(screen.getByText(formatTime(day1)));
     await user.click(screen.getByText("Confirm appointment"));
 
     await waitFor(() => {
@@ -270,10 +299,10 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("10:00 AM"));
+    await user.click(screen.getByText(formatTime(day1)));
     await user.click(screen.getByText("Confirm appointment"));
 
     await waitFor(() => {
@@ -289,13 +318,13 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
     await user.click(screen.getByLabelText("Refresh slots"));
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
   });
 
@@ -312,10 +341,10 @@ describe("App", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("10:00 AM")).toBeInTheDocument();
+      expect(screen.getByText(formatTime(day1))).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("10:00 AM"));
+    await user.click(screen.getByText(formatTime(day1)));
     await user.click(screen.getByText("Confirm appointment"));
 
     await waitFor(() => {

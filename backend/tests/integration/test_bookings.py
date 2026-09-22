@@ -24,8 +24,8 @@ async def test_booking_succeeds_and_returns_doctor(client, db):
 
     assert response.status_code == 201
     body = response.json()
-    assert body["startsAt"] == "2026-01-01T10:00:00Z"
-    assert body["endsAt"] == "2026-01-01T10:30:00Z"
+    assert body["startsAt"] == slot.strftime("%Y-%m-%dT%H:%M:%SZ")
+    assert body["endsAt"] == (slot.replace(minute=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
     assert body["doctor"]["id"] in [d.id for d in doctors]
     assert body["doctor"]["fullName"] in {"Dr. Hart", "Dr. Silva"}
 
@@ -63,7 +63,9 @@ async def test_booking_reduces_slot_count(client, db):
     assert booking.status_code == 201
 
     slots = await client.get("/api/slots")
-    assert slots.json() == [{"startsAt": "2026-01-01T10:00:00Z", "availableDoctors": 1}]
+    assert slots.json() == [
+        {"startsAt": slot.strftime("%Y-%m-%dT%H:%M:%SZ"), "availableDoctors": 1}
+    ]
 
 
 @pytest.mark.parametrize(
@@ -77,6 +79,16 @@ async def test_booking_reduces_slot_count(client, db):
 async def test_invalid_payload_returns_422(client, payload):
     response = await client.post("/api/bookings", json=payload)
     assert response.status_code == 422
+
+
+async def test_booking_past_slot_returns_422(client, db):
+    doctors = await insert_doctors(db, [("Dr. Hart", "General Medicine")])
+    past_slot = utc(10, 0, day_offset=-1)
+    await insert_availability(db, doctors[0], past_slot)
+
+    response = await client.post("/api/bookings", json=booking_payload(past_slot))
+    assert response.status_code == 422
+    assert "past" in response.json()["detail"][0]["msg"].lower()
 
 
 async def test_double_booking_single_doctor_returns_409(client, db):

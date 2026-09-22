@@ -96,7 +96,14 @@ export default function App() {
     }
   }, [confirmedBooking, error]);
 
-  const slotsByDay = useMemo(() => groupSlotsByDay(slots), [slots]);
+  const visibleSlots = useMemo(
+    () => slots.filter((s) => new Date(s.startsAt) > new Date()),
+    [slots],
+  );
+  const visibleByDay = useMemo(
+    () => groupSlotsByDay(visibleSlots),
+    [visibleSlots],
+  );
 
   const confirmSelection = useCallback(async () => {
     if (!selectedSlot || booking) return;
@@ -163,13 +170,13 @@ export default function App() {
               <Info size={18} aria-hidden="true" />
               Loading slots…
             </div>
-          ) : !loading && Object.keys(slotsByDay).length === 0 ? (
+          ) : !loading && Object.keys(visibleByDay).length === 0 ? (
             <div className="status-message status-info">
               <Info size={18} aria-hidden="true" />
               No slots available right now.
             </div>
           ) : (
-            Object.entries(slotsByDay).map(([day, daySlots]) => (
+            Object.entries(visibleByDay).map(([day, daySlots]) => (
               <div className="day-group" key={day}>
                 <div className="day-title">{formatDay(day)}</div>
                 {daySlots.length === 0 ? (
