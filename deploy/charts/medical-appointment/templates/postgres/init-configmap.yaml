@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  001_schema.sql: |
+    create table if not exists doctors (
+      id bigserial primary key,
+      full_name text not null,
+      specialty text not null,
+      created_at timestamp with time zone not null default now()
+    );
+
+    create table if not exists doctor_availabilities (
+      id bigserial primary key,
+      doctor_id bigint not null references doctors(id) on delete cascade,
+      starts_at timestamp with time zone not null,
+      ends_at timestamp with time zone not null,
+      created_at timestamp with time zone not null default now()
+    );
+
+  002_appointments.sql: |
+    create table if not exists appointments (
+      id bigserial primary key,
+      doctor_availability_id bigint not null
+        references doctor_availabilities(id) on delete cascade,
+      created_at timestamp with time zone not null default now()
+    );
+
+    create unique index if not exists uq_appointment_availability
+      on appointments (doctor_availability_id);
+
+  003_seed.sql: |
+    insert into doctors (full_name, specialty) values
+      ('Dr. Amelia Hart', 'General Medicine'),
+      ('Dr. Noah Silva', 'General Medicine'),
+      ('Dr. Lina Moreau', 'Sleep Medicine'),
+      ('Dr. Oscar Bennett', 'Internal Medicine'),
+      ('Dr. Maya Chen', 'General Medicine')
+    on conflict do nothing;
+
+    with slots as (
+      select generated_starts_at
+      from generate_series(
+        date_trunc('day', now()) - interval '7 days',
+        date_trunc('day', now()) + interval '15 days',
+        interval '30 minutes'
+      ) as generated_starts_at
+      where (generated_starts_at::time >= '10:00' and generated_starts_at::time < '14:00')
+         or (generated_starts_at::time >= '16:00' and generated_starts_at::time < '19:00')
+    )
+    insert into doctor_availabilities (doctor_id, starts_at, ends_at)
+    select
+      doctor.id,
+      slot.generated_starts_at,
+      slot.generated_starts_at + interval '30 minutes'
+    from slots as slot
+    cross join (select id from doctors limit 5) as doctor
+    where random() < 0.5
+    on conflict do nothing;

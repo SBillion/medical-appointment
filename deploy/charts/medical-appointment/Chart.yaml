@@ -1,0 +1,14 @@
+apiVersion: v2
+name: medical-appointment
+description: Medical appointment booking system with FastAPI, PostgreSQL, and React
+type: application
+version: 0.1.0
+appVersion: "1.0"
+keywords:
+  - medical
+  - appointment
+  - fastapi
+  - react
+  - postgresql
+maintainers:
+  - name: Medical Appointment Team

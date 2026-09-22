@@ -1,0 +1,44 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+{{- if .Values.ingress.enabled }}
+
+{{- $scheme := "http" -}}
+{{- if .Values.ingress.tls -}}{{- $scheme = "https" -}}{{- end }}
+{{- $firstHost := (index .Values.ingress.hosts 0).host }}
+  {{- range .Values.ingress.hosts }}
+  {{- range .paths }}
+  {{- if contains .path "/api" }}
+Backend API available at:
+  {{ $scheme }}://{{ $firstHost }}{{ .path }}
+  {{- end }}
+  {{- if eq .path "/" }}
+Frontend available at:
+  {{ $scheme }}://{{ $firstHost }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- else }}
+
+  Backend service:
+    export BACKEND_PORT=$(kubectl get svc --namespace {{ .Release.Namespace }} backend -o jsonpath='{.spec.ports[0].port}')
+    echo "Visit http://127.0.0.1:$BACKEND_PORT to use your application"
+
+  Frontend service:
+    export FRONTEND_PORT=$(kubectl get svc --namespace {{ .Release.Namespace }} frontend -o jsonpath='{.spec.ports[0].port}')
+    echo "Visit http://127.0.0.1:$FRONTEND_PORT to use your application"
+
+{{- end }}
+
+PostgreSQL database:
+  Host: postgres.{{ .Release.Namespace }}.svc.cluster.local
+  Port: {{ .Values.postgres.service.port }}
+  Database: {{ .Values.postgres.postgresqlDatabase }}
+  User: {{ .Values.postgres.postgresqlUsername }}

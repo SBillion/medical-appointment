@@ -17,3 +17,9 @@ dist/
 
 postgres_data/coverage/
 
+# Helm chart artifacts
+deploy/charts/*/charts/
+deploy/charts/*/Chart.lock
+*.tgz
+
+

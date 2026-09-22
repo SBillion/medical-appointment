@@ -1,0 +1,107 @@
+# Default values for medical-appointment
+replicaCount: 1
+
+image:
+  backend:
+    repository: ghcr.io/sbillion/medical-appointment-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  frontend:
+    repository: ghcr.io/sbillion/medical-appointment-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: medical-appointment.local
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: backend
+        - path: /
+          pathType: Prefix
+          service: frontend
+  tls: []
+
+resources:
+  backend:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  frontend:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+postgres:
+  enabled: true
+  image: postgres:16-alpine
+  postgresqlUsername: app
+  postgresqlPassword: app
+  postgresqlDatabase: medical_appointment
+  service:
+    port: 5432
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: ""
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+backend:
+  env:
+    DATABASE_URL: "postgresql+asyncpg://app:app@postgres:5432/medical_appointment"
+    CORS_ORIGINS: '["http://localhost:5173", "http://medical-appointment.local"]'
+  healthCheck:
+    path: /api/health
+    port: 8000
+
+frontend:
+  env:
+    VITE_API_BASE_URL: "http://medical-appointment.local/api"
+  port: 5173
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
