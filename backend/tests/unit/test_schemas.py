@@ -1,6 +1,6 @@
 """Unit tests: pure logic with no database or network dependencies."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pydantic import ValidationError
@@ -11,13 +11,27 @@ from app.schemas import AppointmentSlotOut, BookingOut, BookingRequest
 
 
 def test_booking_request_parses_iso_with_z_suffix():
-    req = BookingRequest(starts_at="2026-01-01T10:00:00Z")
-    assert req.starts_at == datetime(2026, 1, 1, 10, 0, tzinfo=UTC)
+    future = datetime.now(UTC) + timedelta(days=1)
+    req = BookingRequest(starts_at=future.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    assert req.starts_at == future.replace(microsecond=0)
 
 
 def test_booking_request_rejects_missing_starts_at():
     with pytest.raises(ValidationError):
         BookingRequest()
+
+
+def test_booking_request_rejects_past_start_time():
+    past = datetime.now(UTC) - timedelta(hours=1)
+    with pytest.raises(ValidationError) as exc_info:
+        BookingRequest(starts_at=past)
+    assert "past" in str(exc_info.value).lower()
+
+
+def test_booking_request_accepts_future_start_time():
+    future = datetime.now(UTC) + timedelta(hours=1)
+    req = BookingRequest(starts_at=future)
+    assert req.starts_at == future
 
 
 # --- AppointmentSlotOut ---

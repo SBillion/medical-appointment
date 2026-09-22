@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 from pydantic.alias_generators import to_camel
 
 
@@ -37,6 +37,14 @@ class BookingRequest(BaseModel):
     )
 
     starts_at: datetime
+
+    @field_validator("starts_at")
+    @classmethod
+    def _starts_at_not_in_past(cls, value: datetime) -> datetime:
+        now = datetime.now(UTC)
+        if value < now:
+            raise ValueError("Cannot book an appointment in the past")
+        return value
 
 
 class DoctorOut(BaseModel):

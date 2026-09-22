@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,15 +14,17 @@ class AvailabilityRepository:
         self._db = db
 
     async def list_unbooked_grouped_by_start(self) -> list[tuple[datetime, int]]:
-        """Return (starts_at, count) for all unbooked availabilities, ordered
-        chronologically."""
+        """Return (starts_at, count) for unbooked availabilities in the future,
+        ordered chronologically."""
         booked_ids = select(Appointment.doctor_availability_id)
+        now = datetime.now(UTC)
         stmt = (
             select(
                 DoctorAvailability.starts_at,
                 func.count(DoctorAvailability.id).label("available_doctors"),
             )
             .where(~DoctorAvailability.id.in_(booked_ids))
+            .where(DoctorAvailability.starts_at > now)
             .group_by(DoctorAvailability.starts_at)
             .order_by(DoctorAvailability.starts_at)
         )
