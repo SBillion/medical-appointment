@@ -96,7 +96,9 @@ def bump_tags(values_file: Path, image_tag: str) -> bool:
 def reset_pending_branch(
     repo: Path, base: str, pending: str
 ) -> None:
-    run("git", "-C", str(repo), "fetch", "--force", "origin", f"{base}:{base}")
+    # Fetch into a remote-tracking ref (not the local branch, which is
+    # already checked out by actions/checkout and cannot be force-updated).
+    run("git", "-C", str(repo), "fetch", "origin", base)
     run(
         "git",
         "-C",
