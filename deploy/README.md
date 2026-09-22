@@ -32,21 +32,61 @@ applies the env values from the config repo (multi-source Application).
 
 | Secret | Where | Purpose |
 |-------|-------|---------|
-| `CONFIG_REPO_PAT` | app repo | GitHub PAT with `repo` scope on the config repo, used to push branches and open/update deploy PRs. |
+| `CONFIG_REPO_PAT` | app repo | GitHub PAT used to push branches and open/update deploy PRs on the config repo. |
 
 The default `GITHUB_TOKEN` is used to push images to GHCR (no extra secret).
 
-## Local development
+#### Creating `CONFIG_REPO_PAT`
 
-Build images inside your minikube Docker daemon and install the chart with
-the local values:
+The `Release` workflow needs to push branches and open pull requests on the
+config repository (`SBillion/medical-appointment-config`). The default
+`GITHUB_TOKEN` is scoped to the app repo only, so you need a Personal Access
+Token with access to the config repo.
+
+1. **Create the PAT** (GitHub → Settings → Developer settings → Personal access
+   tokens → Fine-grained tokens → Generate new token):
+   - **Resource owner**: your GitHub account (or the org owning the config repo)
+   - **Repository access**: select `SBillion/medical-appointment-config`
+   - **Permissions**:
+     - `Contents`: Read and write (push branches, force-push pending branches)
+     - `Pull requests`: Read and write (create/update deploy PRs, enable auto-merge)
+     - `Metadata`: Read (required by GitHub)
+   - **Expiration**: 90 days (or your org's policy)
+
+2. **Add it as a repository secret** on the app repo
+   (`SBillion/medical-appointment` → Settings → Secrets and variables →
+   Actions → New repository secret):
+   - Name: `CONFIG_REPO_PAT`
+   - Value: paste the token
+
+3. **Verify**: merge a test PR into `main` on the app repo and check the
+   `Release` workflow run — it should open a deploy PR on the config repo.
+
+#### ArgoCD repo credentials
+
+ArgoCD also needs to clone both repositories. If they are **public**, no
+configuration is needed. If either repo is **private**, register credentials
+in ArgoCD:
 
 ```bash
-eval "$(minikube docker-env)"
+argocd repo add https://github.com/SBillion/medical-appointment.git \
+  --username <github-username> --password <github-token>
 
-docker build -t medical-appointment-backend:local  ./backend
-docker build -t medical-appointment-frontend:local ./frontend
+argocd repo add https://github.com/SBillion/medical-appointment-config.git \
+  --username <github-username> --password <github-token>
+```
 
-helm install medical-appointment deploy/charts/medical-appointment \
+Use a separate PAT (or the same one) with `Contents: Read` on both repos.
+
+## Local development
+
+For local development, see the [config repo's LOCAL_SETUP.md](https://github.com/SBillion/medical-appointment-config/blob/main/docs/LOCAL_SETUP.md)
+which covers starting minikube, installing ArgoCD, and registering the
+ApplicationSet — ArgoCD handles the deployment from there.
+
+To render the chart templates locally without a cluster (requires `helm`):
+
+```bash
+helm template medical-appointment deploy/charts/medical-appointment \
   -f deploy/charts/medical-appointment/values-develop.yaml
 ```
