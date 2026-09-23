@@ -69,6 +69,7 @@ autoscaling:
 
 postgres:
   enabled: true
+  existingSecret: ""
   image: postgres:16-alpine
   postgresqlUsername: app
   postgresqlPassword: app

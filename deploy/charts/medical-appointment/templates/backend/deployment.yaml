@@ -36,11 +36,19 @@ spec:
           containerPort: 8000
           protocol: TCP
         env:
+        {{- if .Values.postgres.existingSecret }}
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgres.existingSecret }}
+              key: database-url
+        {{- else }}
         - name: DATABASE_URL
           valueFrom:
             configMapKeyRef:
               name: backend-config
               key: database-url
+        {{- end }}
         - name: CORS_ORIGINS
           valueFrom:
             configMapKeyRef:
@@ -49,12 +57,12 @@ spec:
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
-              name: postgres-secret
+              name: {{ .Values.postgres.existingSecret | default "postgres-secret" }}
               key: postgres-user
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: postgres-secret
+              name: {{ .Values.postgres.existingSecret | default "postgres-secret" }}
               key: postgres-password
         livenessProbe:
           httpGet:
