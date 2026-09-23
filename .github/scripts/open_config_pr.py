@@ -126,6 +126,7 @@ def commit_and_push(repo: Path, pending: str, image_tag: str, env: str) -> None:
         "-C",
         str(repo),
         "commit",
+        "-S",
         "-m",
         f"deploy({env}): bump image tag to {short(image_tag)}",
     )

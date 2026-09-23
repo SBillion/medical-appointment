@@ -33,6 +33,7 @@ applies the env values from the config repo (multi-source Application).
 | Secret | Where | Purpose |
 |-------|-------|---------|
 | `CONFIG_REPO_PAT` | app repo | GitHub PAT used to push branches and open/update deploy PRs on the config repo. |
+| `GPG_PRIVATE_KEY` | app repo | GPG private key (ASCII-armored) for signing commits made by the Release workflow. |
 
 The default `GITHUB_TOKEN` is used to push images to GHCR (no extra secret).
 
