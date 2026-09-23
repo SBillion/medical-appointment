@@ -1,5 +1,6 @@
 # Development environment overrides
-replicaCount: 1
+# Only values that differ from values.yaml belong here.
+# Env-specific ingress, resources, autoscaling, etc. live in the config repo.
 
 image:
   backend:
@@ -10,34 +11,3 @@ image:
     repository: medical-appointment-frontend
     tag: local
     pullPolicy: Never
-
-ingress:
-  enabled: true
-  hosts:
-    - host: medical-appointment.local
-      paths:
-        - path: /api
-          pathType: Prefix
-          service: backend
-        - path: /
-          pathType: Prefix
-          service: frontend
-
-autoscaling:
-  enabled: false
-
-resources:
-  backend:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-  frontend:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi

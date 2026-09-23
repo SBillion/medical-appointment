@@ -31,18 +31,10 @@ service:
   port: 80
 
 ingress:
-  enabled: true
+  enabled: false
   className: "nginx"
   annotations: {}
-  hosts:
-    - host: medical-appointment.local
-      paths:
-        - path: /api
-          pathType: Prefix
-          service: backend
-        - path: /
-          pathType: Prefix
-          service: frontend
+  hosts: []
   tls: []
 
 resources:
