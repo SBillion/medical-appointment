@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    allowedHosts: ["medical-appointment.local"],
   },
   test: {
     globals: true,
