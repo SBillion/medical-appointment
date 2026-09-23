@@ -80,16 +80,13 @@ postgres:
       memory: 128Mi
 
 backend:
-  env:
-    DATABASE_URL: "postgresql+asyncpg://app:app@postgres:5432/medical_appointment"
-    CORS_ORIGINS: '["http://localhost:5173", "http://medical-appointment.local"]'
+  env: {}
   healthCheck:
     path: /api/health
     port: 8000
 
 frontend:
-  env:
-    VITE_API_BASE_URL: "http://medical-appointment.local/api"
+  env: {}
   port: 5173
 
 nodeSelector: {}
