@@ -54,6 +54,30 @@ gitleaks detect --source . --config .gitleaks.toml
   what the floor is for.
 - Pre-commit runs the same set as CI, so a red CI means a skipped hook.
 
+## Tool configuration
+
+- **Every tool that takes a path has its configuration committed at the repo
+  root** — ruff and mypy in `pyproject.toml`, the eslint flat config, prettier,
+  tsconfig, pytest. Behaviour nobody wrote down changes silently when the tool
+  upgrades.
+- **Say what is checked, explicitly.** An `include` list plus `force-exclude`
+  beats a bare `check .`: the tool then skips what it should even when the path
+  is passed on the command line.
+- **Documentation is never linted or formatted by a code tool.** Ruff 0.17+
+  formats Markdown by default — `include = ["*.py"]`,
+  `extend-exclude = ["*.md"]`, `force-exclude = true`. Measured on this toolkit's
+  own corpus (302 Markdown files): `ruff check` ignores `.md` outright, while
+  `ruff format` rewrites 15 of them — re-wrapping snippets inside *archived*
+  planning documents, which are a record, not source. It also silently corrects
+  a deliberately unformatted "don't do this" example, so the doc stops telling
+  the truth. The same for prettier, which needs an ignore file rather than a
+  scope in the command.
+- **A new directory joins the ignore lists in the same PR that creates it.**
+  Installed `docs/rules/` is generated: a formatter rewriting it produces a diff
+  nobody can review, and the next install overwrites it anyway.
+- **Pin the version next to the config** (lockfile, pre-commit `rev`). A tool
+  that changed its defaults overnight must not change what CI checks.
+
 ## CI/CD
 
 - **One workflow per concern**, one required check per job. The list of required
