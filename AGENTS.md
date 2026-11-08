@@ -1,5 +1,14 @@
 # AGENTS.md
 
+## Agent rules
+
+Delivery, GSD, testing, language, security, engineering and multi-repo rules:
+[`docs/rules/index.md`](docs/rules/index.md). Read it before your first branch or
+commit. This repo tracks no tickets, so the ticket rules of `delivery.md` are
+off. This file only records what is true of this repo.
+
+## Project
+
 Project conventions for AI agents working on this codebase.
 
 ## Stack
@@ -98,9 +107,8 @@ Runs on every commit: ruff, ruff-format, mypy, uv lock check, eslint, prettier, 
 
 ## Git Conventions
 
-- Atomic commits, one logical change per commit
-- Conventional commit prefixes: `feat:`, `fix:`, `chore:`, `test:`, `docs:`, `ci:`, `refactor:`
-- Keep commit messages concise — one line summary, optional body
+Commit, branch and PR form: [`docs/rules/delivery.md`](docs/rules/delivery.md).
+No ticket id here — this repo tracks none.
 
 ## Database
 
